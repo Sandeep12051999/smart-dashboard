@@ -1,10 +1,13 @@
-// Expense Tracker App with Monthly Data Management
+// Expense Tracker App - Database Connected
+
+const API_BASE = 'http://localhost:5500/api';
 
 // State
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let expenses = [];
 let budgets = {};
+let syncStatus = 'synced';
 
 // Category configuration
 const categories = {
@@ -23,10 +26,67 @@ const monthNames = [
     'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+// Get auth token
+function getToken() {
+    return localStorage.getItem('token');
+}
+
+// Check authentication
+function checkAuth() {
+    const token = getToken();
+    if (!token) {
+        window.location.href = '../login.html';
+        return false;
+    }
+    return true;
+}
+
+// API helper
+async function apiRequest(endpoint, options = {}) {
+    const token = getToken();
+
+    const config = {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            ...options.headers
+        }
+    };
+
+    const response = await fetch(`${API_BASE}${endpoint}`, config);
+
+    if (response.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '../login.html';
+        throw new Error('Unauthorized');
+    }
+
+    return response;
+}
+
+// Update sync status indicator
+function updateSyncStatus(status) {
+    syncStatus = status;
+    const syncEl = document.getElementById('syncStatus');
+    if (!syncEl) return;
+
+    const icons = { syncing: '🔄', synced: '☁️', error: '⚠️' };
+    const texts = { syncing: 'Syncing...', synced: 'Synced', error: 'Sync Error' };
+
+    syncEl.className = `sync-status ${status}`;
+    syncEl.innerHTML = `
+        <span class="sync-icon">${icons[status]}</span>
+        <span class="sync-text">${texts[status]}</span>
+    `;
+}
+
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!checkAuth()) return;
+
     setDefaultDate();
+    await loadData();
     updateUI();
     renderCategoryBreakdown();
     renderHistory();
@@ -37,24 +97,34 @@ function getMonthKey(year = currentYear, month = currentMonth) {
     return `${year}-${String(month + 1).padStart(2, '0')}`;
 }
 
-// Load data from localStorage
-function loadData() {
-    const savedExpenses = localStorage.getItem('expenses');
-    const savedBudgets = localStorage.getItem('budgets');
+// Load data from database
+async function loadData() {
+    updateSyncStatus('syncing');
 
-    if (savedExpenses) {
-        expenses = JSON.parse(savedExpenses);
+    try {
+        // Load all expenses
+        const expensesRes = await apiRequest('/expenses');
+        if (expensesRes.ok) {
+            const data = await expensesRes.json();
+            expenses = data.expenses || [];
+        }
+
+        // Load all budgets
+        const budgetsRes = await apiRequest('/budgets');
+        if (budgetsRes.ok) {
+            const data = await budgetsRes.json();
+            // Convert array to object keyed by month
+            budgets = {};
+            (data.budgets || []).forEach(b => {
+                budgets[b.month] = parseFloat(b.total_budget);
+            });
+        }
+
+        updateSyncStatus('synced');
+    } catch (error) {
+        console.error('Load data error:', error);
+        updateSyncStatus('error');
     }
-
-    if (savedBudgets) {
-        budgets = JSON.parse(savedBudgets);
-    }
-}
-
-// Save data to localStorage
-function saveData() {
-    localStorage.setItem('expenses', JSON.stringify(expenses));
-    localStorage.setItem('budgets', JSON.stringify(budgets));
 }
 
 // Set default date to today
@@ -134,10 +204,12 @@ function updateSummaryCards() {
     const budget = getMonthBudget();
     const spent = calculateTotalSpent();
     const remaining = budget - spent;
+    const monthExpenses = getMonthExpenses();
 
     document.getElementById('monthlyBudget').textContent = formatCurrency(budget);
     document.getElementById('totalSpent').textContent = formatCurrency(spent);
     document.getElementById('remaining').textContent = formatCurrency(remaining);
+    document.getElementById('transactionCount').textContent = monthExpenses.length;
 
     // Update progress bar
     const progressFill = document.getElementById('progressFill');
@@ -145,7 +217,6 @@ function updateSummaryCards() {
         const percentage = Math.min((spent / budget) * 100, 100);
         progressFill.style.width = `${percentage}%`;
 
-        // Change color based on percentage
         progressFill.classList.remove('warning', 'danger');
         if (percentage > 90) {
             progressFill.classList.add('danger');
@@ -171,7 +242,7 @@ function formatCurrency(amount) {
 }
 
 // Add new expense
-function addExpense(event) {
+async function addExpense(event) {
     event.preventDefault();
 
     const amount = document.getElementById('amount').value;
@@ -184,40 +255,74 @@ function addExpense(event) {
         return;
     }
 
-    const expense = {
-        id: Date.now(),
-        amount: parseFloat(amount),
-        category,
-        description: description || categories[category].name,
-        date: date || new Date().toISOString().split('T')[0],
-        createdAt: new Date().toISOString()
-    };
+    updateSyncStatus('syncing');
 
-    expenses.push(expense);
-    saveData();
+    try {
+        const response = await apiRequest('/expenses', {
+            method: 'POST',
+            body: JSON.stringify({
+                amount: parseFloat(amount),
+                category,
+                description: description || categories[category].name,
+                date: date || new Date().toISOString().split('T')[0]
+            })
+        });
 
-    // Update view to show the month where expense was added
-    const expenseDate = new Date(expense.date);
-    if (expenseDate.getMonth() !== currentMonth || expenseDate.getFullYear() !== currentYear) {
-        currentMonth = expenseDate.getMonth();
-        currentYear = expenseDate.getFullYear();
+        if (response.ok) {
+            const data = await response.json();
+            expenses.push(data.expense);
+
+            // Update view to show the month where expense was added
+            const expenseDate = new Date(data.expense.date);
+            if (expenseDate.getMonth() !== currentMonth || expenseDate.getFullYear() !== currentYear) {
+                currentMonth = expenseDate.getMonth();
+                currentYear = expenseDate.getFullYear();
+            }
+
+            updateUI();
+            renderHistory();
+            updateSyncStatus('synced');
+
+            // Reset form
+            document.getElementById('expenseForm').reset();
+            setDefaultDate();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to add expense');
+            updateSyncStatus('error');
+        }
+    } catch (error) {
+        console.error('Add expense error:', error);
+        alert('Failed to add expense. Please try again.');
+        updateSyncStatus('error');
     }
-
-    updateUI();
-    renderHistory();
-
-    // Reset form
-    document.getElementById('expenseForm').reset();
-    setDefaultDate();
 }
 
 // Delete expense
-function deleteExpense(id) {
-    if (confirm('Are you sure you want to delete this expense?')) {
-        expenses = expenses.filter(expense => expense.id !== id);
-        saveData();
-        updateUI();
-        renderHistory();
+async function deleteExpense(id) {
+    if (!confirm('Are you sure you want to delete this expense?')) return;
+
+    updateSyncStatus('syncing');
+
+    try {
+        const response = await apiRequest(`/expenses/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            expenses = expenses.filter(expense => expense.id !== id);
+            updateUI();
+            renderHistory();
+            updateSyncStatus('synced');
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to delete expense');
+            updateSyncStatus('error');
+        }
+    } catch (error) {
+        console.error('Delete expense error:', error);
+        alert('Failed to delete expense. Please try again.');
+        updateSyncStatus('error');
     }
 }
 
@@ -259,7 +364,7 @@ function renderExpenseList() {
                     <h4>${expense.description}</h4>
                     <p>${cat.name} • ${date}</p>
                 </div>
-                <span class="expense-amount">-${formatCurrency(expense.amount)}</span>
+                <span class="expense-amount">-${formatCurrency(parseFloat(expense.amount))}</span>
                 <button class="btn-delete" onclick="deleteExpense(${expense.id})">🗑️</button>
             </div>
         `;
@@ -389,11 +494,41 @@ function navigateToMonth(year, month) {
 function openBudgetModal() {
     const modal = document.getElementById('budgetModal');
     const budgetInput = document.getElementById('budgetAmount');
-    const currentBudget = getMonthBudget();
+    const monthSelect = document.getElementById('budgetMonth');
+    const yearSelect = document.getElementById('budgetYear');
 
-    budgetInput.value = currentBudget > 0 ? currentBudget : '';
-    updateMonthDisplay();
+    // Populate year dropdown (2020 to 2035)
+    yearSelect.innerHTML = '';
+    for (let y = 2020; y <= 2035; y++) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        if (y === currentYear) option.selected = true;
+        yearSelect.appendChild(option);
+    }
+
+    // Set current month
+    monthSelect.value = currentMonth;
+
+    // Update preview and input
+    updateBudgetPreview();
+
     modal.classList.add('show');
+}
+
+function updateBudgetPreview() {
+    const monthSelect = document.getElementById('budgetMonth');
+    const yearSelect = document.getElementById('budgetYear');
+    const budgetInput = document.getElementById('budgetAmount');
+    const previewAmount = document.getElementById('previewAmount');
+
+    const selectedMonth = parseInt(monthSelect.value);
+    const selectedYear = parseInt(yearSelect.value);
+    const key = getMonthKey(selectedYear, selectedMonth);
+
+    const existingBudget = budgets[key] || 0;
+    previewAmount.textContent = formatCurrency(existingBudget);
+    budgetInput.value = existingBudget > 0 ? existingBudget : '';
 }
 
 function closeBudgetModal() {
@@ -405,21 +540,59 @@ function setBudgetValue(value) {
     document.getElementById('budgetAmount').value = value;
 }
 
-function saveBudget() {
+async function saveBudget() {
     const budgetInput = document.getElementById('budgetAmount');
+    const monthSelect = document.getElementById('budgetMonth');
+    const yearSelect = document.getElementById('budgetYear');
+
     const amount = parseFloat(budgetInput.value) || 0;
-    const key = getMonthKey();
+    const selectedMonth = parseInt(monthSelect.value);
+    const selectedYear = parseInt(yearSelect.value);
+    const key = getMonthKey(selectedYear, selectedMonth);
 
-    if (amount > 0) {
-        budgets[key] = amount;
-    } else {
-        delete budgets[key];
+    updateSyncStatus('syncing');
+
+    try {
+        if (amount > 0) {
+            const response = await apiRequest('/budgets', {
+                method: 'POST',
+                body: JSON.stringify({
+                    month: key,
+                    total_budget: amount
+                })
+            });
+
+            if (response.ok) {
+                budgets[key] = amount;
+                updateSyncStatus('synced');
+            } else {
+                const error = await response.json();
+                alert(error.message || 'Failed to save budget');
+                updateSyncStatus('error');
+                return;
+            }
+        } else {
+            // Delete budget if amount is 0
+            const response = await apiRequest(`/budgets/${key}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok || response.status === 404) {
+                delete budgets[key];
+                updateSyncStatus('synced');
+            } else {
+                updateSyncStatus('error');
+            }
+        }
+
+        updateUI();
+        renderHistory();
+        closeBudgetModal();
+    } catch (error) {
+        console.error('Save budget error:', error);
+        alert('Failed to save budget. Please try again.');
+        updateSyncStatus('error');
     }
-
-    saveData();
-    updateUI();
-    renderHistory();
-    closeBudgetModal();
 }
 
 // Close modal when clicking outside

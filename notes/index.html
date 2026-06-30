@@ -9,36 +9,156 @@
 <body>
     <div class="app-container">
         <header class="header">
-            <h1>📝 Quick Notes</h1>
-            <button class="btn-new" onclick="createNewNote()">+ New Note</button>
+            <div class="header-left">
+                <button class="btn-menu" onclick="toggleSidebar()">☰</button>
+                <h1>📝 Quick Notes</h1>
+            </div>
+            <div class="header-right">
+                <span class="sync-status" id="syncStatus">
+                    <span class="sync-icon">☁️</span>
+                    <span class="sync-text">Synced</span>
+                </span>
+                <button class="btn-new" onclick="createNewNote()">
+                    <span>+</span> New Note
+                </button>
+            </div>
         </header>
 
         <div class="notes-container">
             <!-- Notes Sidebar -->
-            <aside class="notes-sidebar">
+            <aside class="notes-sidebar" id="notesSidebar">
                 <div class="search-box">
+                    <span class="search-icon">🔍</span>
                     <input type="text" id="searchNotes" placeholder="Search notes..." oninput="searchNotes()">
+                    <button class="btn-clear-search" id="clearSearch" onclick="clearSearch()" style="display: none;">✕</button>
                 </div>
+
+                <!-- Filter Tabs: All, Pinned -->
+                <div class="filter-section">
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all" onclick="filterNotes('all')">All</button>
+                        <button class="filter-tab" data-filter="pinned" onclick="filterNotes('pinned')">📌 Pinned</button>
+                    </div>
+
+                    <!-- Tags Filter Section -->
+                    <div class="tags-filter-section">
+                        <div class="tags-filter-header">
+                            <span>🏷️ Tags</span>
+                            <button class="btn-manage-tags" onclick="toggleManageTagsMode()" id="btnManageTags" title="Manage tags">⚙️</button>
+                        </div>
+                        <div class="tags-filter-list" id="tagsFilterList">
+                            <!-- Tags for filtering will be rendered here -->
+                        </div>
+                        <div class="manage-tags-hint" id="manageTagsHint" style="display: none;">
+                            Click ✕ on tags to delete them
+                        </div>
+                    </div>
+                </div>
+
                 <div class="notes-list" id="notesList">
                     <!-- Notes will be listed here -->
+                </div>
+
+                <div class="sidebar-footer">
+                    <span id="notesCount">0 notes</span>
                 </div>
             </aside>
 
             <!-- Note Editor -->
-            <main class="note-editor">
+            <main class="note-editor" id="noteEditor" style="display: none;">
                 <div class="editor-toolbar">
-                    <input type="text" id="noteTitle" placeholder="Note title..." oninput="autoSave()">
+                    <div class="toolbar-left">
+                        <input type="text" id="noteTitle" placeholder="Note title..." oninput="autoSave()">
+                    </div>
                     <div class="toolbar-actions">
+                        <button class="btn-toolbar" id="btnPin" onclick="togglePin()" title="Pin note">
+                            <span id="pinIcon">📌</span>
+                        </button>
                         <span class="save-status" id="saveStatus">Saved</span>
-                        <button class="btn-delete" onclick="deleteCurrentNote()" title="Delete note">🗑️</button>
+                        <button class="btn-toolbar btn-delete" onclick="deleteCurrentNote()" title="Delete note">🗑️</button>
+                        <button class="btn-toolbar btn-close" onclick="closeNote()" title="Close note">✕</button>
                     </div>
                 </div>
-                <textarea id="noteContent" placeholder="Start writing..." oninput="autoSave()"></textarea>
+
+                <!-- Tags Section with Dropdown -->
+                <div class="editor-tags" id="editorTags">
+                    <div class="tags-container" id="tagsContainer">
+                        <!-- Tags will be shown here -->
+                    </div>
+                    <div class="tag-dropdown-wrapper">
+                        <button class="btn-add-tag" onclick="toggleTagDropdown()">+ Add Tag</button>
+
+                        <!-- Tag Dropdown -->
+                        <div class="tag-dropdown" id="tagDropdown">
+                            <div class="tag-dropdown-header">
+                                <input type="text" id="tagSearchInput" placeholder="Search or create tag..." oninput="filterTagList()">
+                            </div>
+                            <div class="tag-dropdown-list" id="tagDropdownList">
+                                <!-- Available tags will be listed here -->
+                            </div>
+                            <div class="tag-dropdown-footer">
+                                <button class="btn-create-new-tag" onclick="showNewTagForm()">+ Create New Tag</button>
+                            </div>
+
+                            <!-- New Tag Form -->
+                            <div class="new-tag-form" id="newTagForm" style="display: none;">
+                                <div class="new-tag-header">
+                                    <span>Create New Tag</span>
+                                    <button class="btn-back" onclick="hideNewTagForm()">← Back</button>
+                                </div>
+                                <input type="text" id="newTagName" placeholder="Tag name...">
+                                <div class="color-picker">
+                                    <span class="color-label">Choose color:</span>
+                                    <div class="color-options" id="colorOptions">
+                                        <!-- Colors will be rendered here -->
+                                    </div>
+                                </div>
+                                <button class="btn-save-tag" onclick="createNewTag()">Create Tag</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <textarea id="noteContent" placeholder="Start writing your note..." oninput="autoSave()"></textarea>
+
                 <div class="editor-footer">
                     <span id="charCount">0 characters</span>
+                    <span id="wordCount">0 words</span>
                     <span id="lastSaved"></span>
                 </div>
             </main>
+
+            <!-- Empty State / Welcome Screen -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">📝</div>
+                <h2>Create a New Note</h2>
+                <p>Select a note from the sidebar or create a new one to get started</p>
+                <button class="btn-new-large" onclick="createNewNote()">
+                    <span>+</span> Create New Note
+                </button>
+                <div class="shortcuts-info">
+                    <p>Keyboard Shortcuts:</p>
+                    <ul>
+                        <li><kbd>Ctrl</kbd> + <kbd>N</kbd> - New Note</li>
+                        <li><kbd>Ctrl</kbd> + <kbd>S</kbd> - Save Note</li>
+                        <li><kbd>Ctrl</kbd> + <kbd>F</kbd> - Search</li>
+                        <li><kbd>Esc</kbd> - Close Note</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Tag Modal -->
+    <div class="modal-overlay" id="deleteTagModal" style="display: none;">
+        <div class="modal-content">
+            <h3>Delete Tag</h3>
+            <p>Are you sure you want to delete "<span id="deleteTagName"></span>"?</p>
+            <p class="modal-warning">This will remove the tag from all notes.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeDeleteTagModal()">Cancel</button>
+                <button class="btn-confirm-delete" onclick="confirmDeleteTag()">Delete</button>
+            </div>
         </div>
     </div>
 

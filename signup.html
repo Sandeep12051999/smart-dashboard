@@ -9,9 +9,12 @@
 <body>
     <div class="auth-container">
         <div class="auth-card">
+            <div class="auth-logo">
+                <div class="logo-icon">📊</div>
+            </div>
             <div class="auth-header">
-                <h1>Smart Dashboard</h1>
-                <p>Create a new account</p>
+                <h1>Create Account</h1>
+                <p>Join Smart Dashboard today</p>
             </div>
 
             <div class="error-message" id="errorMessage"></div>
@@ -20,32 +23,73 @@
             <form id="signupForm" onsubmit="handleSignup(event)">
                 <div class="form-group">
                     <label for="name">Full Name</label>
-                    <input type="text" id="name" placeholder="Enter your name" required>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="name" placeholder="Enter your full name" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Enter your email" required>
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📧</span>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Create a password" required minlength="6">
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" placeholder="Create a password" required minlength="6" oninput="checkPasswordStrength()">
+                        <button type="button" class="toggle-password" onclick="togglePassword('password')">👁️</button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <span class="strength-text" id="strengthText"></span>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔐</span>
+                        <input type="password" id="confirmPassword" placeholder="Confirm your password" required oninput="checkPasswordMatch()">
+                        <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">👁️</button>
+                    </div>
+                    <span class="password-match" id="passwordMatch"></span>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <span class="checkmark"></span>
+                        I agree to the <a href="#">Terms of Service</a>
+                    </label>
                 </div>
 
                 <button type="submit" class="btn-primary" id="submitBtn">
-                    Create Account
+                    <span class="btn-text">Create Account</span>
+                    <span class="btn-loader" style="display: none;"></span>
                 </button>
             </form>
 
             <p class="auth-footer">
-                Already have an account? <a href="login.html">Sign in</a>
+                Already have an account? <a href="login.html">Sign In</a>
             </p>
+        </div>
+
+        <div class="auth-features">
+            <h3>Why join us?</h3>
+            <ul>
+                <li>🔒 Secure data storage</li>
+                <li>☁️ Sync across devices</li>
+                <li>📈 Track your progress</li>
+                <li>🎯 Stay productive</li>
+                <li>🆓 Free to use</li>
+            </ul>
         </div>
     </div>
 
@@ -55,7 +99,7 @@
         // Check if already logged in
         (function() {
             const token = localStorage.getItem('token');
-            if (token) {
+            if (token && token !== 'guest_token') {
                 window.location.href = 'index.html';
             }
         })();
@@ -67,10 +111,19 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
             const submitBtn = document.getElementById('submitBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoader = submitBtn.querySelector('.btn-loader');
 
+            // Validations
             if (!name || !email || !password || !confirmPassword) {
                 showError('Please fill in all fields');
+                return;
+            }
+
+            if (!agreeTerms) {
+                showError('Please agree to the Terms of Service');
                 return;
             }
 
@@ -84,8 +137,10 @@
                 return;
             }
 
+            // Show loading state
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Creating account...';
+            btnText.textContent = 'Creating account...';
+            btnLoader.style.display = 'inline-block';
 
             try {
                 const response = await fetch(`${API_URL}/auth/register`, {
@@ -104,14 +159,86 @@
                         window.location.href = 'login.html';
                     }, 2000);
                 } else {
-                    showError(data.message || 'Registration failed');
+                    showError(data.message || 'Registration failed. Please try again.');
                 }
             } catch (error) {
                 console.error('Signup error:', error);
-                showError('Server not available. Please try again later.');
+                showError('Unable to connect to server. Please try again later.');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Account';
+                btnText.textContent = 'Create Account';
+                btnLoader.style.display = 'none';
+            }
+        }
+
+        function togglePassword(fieldId) {
+            const passwordInput = document.getElementById(fieldId);
+            const toggleBtn = passwordInput.parentElement.querySelector('.toggle-password');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthFill = document.getElementById('strengthFill');
+            const strengthText = document.getElementById('strengthText');
+
+            let strength = 0;
+            let text = '';
+            let color = '';
+
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            switch (strength) {
+                case 0:
+                case 1:
+                    text = 'Weak';
+                    color = '#f85149';
+                    break;
+                case 2:
+                    text = 'Fair';
+                    color = '#ffa657';
+                    break;
+                case 3:
+                    text = 'Good';
+                    color = '#d29922';
+                    break;
+                case 4:
+                case 5:
+                    text = 'Strong';
+                    color = '#3fb950';
+                    break;
+            }
+
+            strengthFill.style.width = (strength * 20) + '%';
+            strengthFill.style.background = color;
+            strengthText.textContent = password.length > 0 ? text : '';
+            strengthText.style.color = color;
+        }
+
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const matchText = document.getElementById('passwordMatch');
+
+            if (confirmPassword.length === 0) {
+                matchText.textContent = '';
+            } else if (password === confirmPassword) {
+                matchText.textContent = '✓ Passwords match';
+                matchText.style.color = '#3fb950';
+            } else {
+                matchText.textContent = '✗ Passwords do not match';
+                matchText.style.color = '#f85149';
             }
         }
 
@@ -121,6 +248,10 @@
             successEl.style.display = 'none';
             errorEl.textContent = message;
             errorEl.style.display = 'block';
+
+            // Shake animation
+            errorEl.classList.add('shake');
+            setTimeout(() => errorEl.classList.remove('shake'), 500);
 
             setTimeout(() => {
                 errorEl.style.display = 'none';

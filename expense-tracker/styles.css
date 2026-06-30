@@ -18,10 +18,16 @@ body {
 }
 
 .header {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 20px 0;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     margin-bottom: 20px;
+}
+
+.header-left {
+    text-align: left;
 }
 
 .header h1 {
@@ -35,6 +41,32 @@ body {
 .subtitle {
     color: #888;
     margin-top: 5px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.sync-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #3fb950;
+    padding: 6px 12px;
+    background: rgba(63, 185, 80, 0.1);
+    border-radius: 20px;
+}
+
+.sync-status.syncing {
+    color: #f7931a;
+    background: rgba(247, 147, 26, 0.1);
+}
+
+.sync-status.error {
+    color: #f85149;
+    background: rgba(248, 81, 73, 0.1);
 }
 
 /* Month Navigation */
@@ -98,7 +130,7 @@ body {
 /* Summary Cards */
 .summary-cards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     margin-bottom: 25px;
 }
@@ -139,6 +171,16 @@ body {
 
 .card.balance .amount {
     color: #3fb950;
+}
+
+.card.transactions .amount {
+    color: #a371f7;
+}
+
+.card.transactions .transaction-label {
+    font-size: 0.75rem;
+    color: #6e7681;
+    margin-top: 5px;
 }
 
 .btn-edit {
@@ -576,6 +618,55 @@ body {
     border-color: #f7931a;
 }
 
+/* Month Year Selector in Modal */
+.month-year-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.month-year-selector select {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.month-year-selector select:focus {
+    border-color: #f7931a;
+}
+
+.month-year-selector select option {
+    background: #1a1a2e;
+}
+
+.budget-preview {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.budget-preview .preview-label {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.budget-preview .preview-amount {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #58a6ff;
+}
+
 .modal-footer {
     display: flex;
     gap: 10px;
@@ -617,6 +708,10 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
     .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .month-year-selector {
         grid-template-columns: 1fr;
     }
 

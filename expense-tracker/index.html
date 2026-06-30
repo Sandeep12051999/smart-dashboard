@@ -9,8 +9,16 @@
 <body>
     <div class="app-container">
         <header class="header">
-            <h1>💰 Expense Tracker</h1>
-            <p class="subtitle">Track your monthly expenses</p>
+            <div class="header-left">
+                <h1>💰 Expense Tracker</h1>
+                <p class="subtitle">Track your monthly expenses</p>
+            </div>
+            <div class="header-right">
+                <span class="sync-status" id="syncStatus">
+                    <span class="sync-icon">☁️</span>
+                    <span class="sync-text">Synced</span>
+                </span>
+            </div>
         </header>
 
         <!-- Month Navigation -->
@@ -42,6 +50,11 @@
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
+            </div>
+            <div class="card transactions">
+                <h3>Transactions</h3>
+                <p class="amount" id="transactionCount">0</p>
+                <p class="transaction-label">this month</p>
             </div>
         </div>
 
@@ -131,8 +144,37 @@
                 <button class="close-btn" onclick="closeBudgetModal()">×</button>
             </div>
             <div class="modal-body">
+                <div class="month-year-selector">
+                    <div class="form-group">
+                        <label for="budgetMonth">Month</label>
+                        <select id="budgetMonth" onchange="updateBudgetPreview()">
+                            <option value="0">January</option>
+                            <option value="1">February</option>
+                            <option value="2">March</option>
+                            <option value="3">April</option>
+                            <option value="4">May</option>
+                            <option value="5">June</option>
+                            <option value="6">July</option>
+                            <option value="7">August</option>
+                            <option value="8">September</option>
+                            <option value="9">October</option>
+                            <option value="10">November</option>
+                            <option value="11">December</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetYear">Year</label>
+                        <select id="budgetYear" onchange="updateBudgetPreview()">
+                            <!-- Years will be populated by JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="budget-preview" id="budgetPreview">
+                    <span class="preview-label">Current budget for this month:</span>
+                    <span class="preview-amount" id="previewAmount">₹0</span>
+                </div>
                 <div class="form-group">
-                    <label for="budgetAmount">Budget for <span id="budgetMonthLabel">June 2026</span></label>
+                    <label for="budgetAmount">New Budget Amount</label>
                     <input type="number" id="budgetAmount" placeholder="Enter budget amount" min="0">
                 </div>
                 <div class="budget-suggestions">

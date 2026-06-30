@@ -9,9 +9,12 @@
 <body>
     <div class="auth-container">
         <div class="auth-card">
+            <div class="auth-logo">
+                <div class="logo-icon">📊</div>
+            </div>
             <div class="auth-header">
-                <h1>Smart Dashboard</h1>
-                <p>Sign in to your account</p>
+                <h1>Welcome Back</h1>
+                <p>Sign in to continue to Smart Dashboard</p>
             </div>
 
             <div class="error-message" id="errorMessage"></div>
@@ -19,31 +22,60 @@
 
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Enter your email" required>
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📧</span>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter your password" required>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="rememberMe">
+                        <span class="checkmark"></span>
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-link">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="btn-primary" id="submitBtn">
-                    Sign In
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-loader" style="display: none;"></span>
                 </button>
             </form>
 
             <div class="divider">
-                <span>or</span>
+                <span>or continue with</span>
             </div>
 
-            <button class="btn-secondary" onclick="continueAsGuest()">
+            <button class="btn-guest" onclick="continueAsGuest()">
+                <span class="guest-icon">👤</span>
                 Continue as Guest
             </button>
 
             <p class="auth-footer">
-                Don't have an account? <a href="signup.html">Sign up</a>
+                Don't have an account? <a href="signup.html">Create Account</a>
             </p>
+        </div>
+
+        <div class="auth-features">
+            <h3>What you can do:</h3>
+            <ul>
+                <li>📊 Track your expenses</li>
+                <li>📝 Take quick notes</li>
+                <li>🍅 Use Pomodoro timer</li>
+                <li>🧮 Scientific calculator</li>
+                <li>🎤 Practice English speaking</li>
+            </ul>
         </div>
     </div>
 
@@ -53,7 +85,7 @@
         // Check if already logged in
         (function() {
             const token = localStorage.getItem('token');
-            if (token) {
+            if (token && token !== 'guest_token') {
                 window.location.href = 'index.html';
             }
         })();
@@ -64,14 +96,18 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const submitBtn = document.getElementById('submitBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoader = submitBtn.querySelector('.btn-loader');
 
             if (!email || !password) {
                 showError('Please fill in all fields');
                 return;
             }
 
+            // Show loading state
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Signing in...';
+            btnText.textContent = 'Signing in...';
+            btnLoader.style.display = 'inline-block';
 
             try {
                 const response = await fetch(`${API_URL}/auth/login`, {
@@ -87,19 +123,28 @@
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Remember me functionality
+                    if (document.getElementById('rememberMe').checked) {
+                        localStorage.setItem('rememberedEmail', email);
+                    } else {
+                        localStorage.removeItem('rememberedEmail');
+                    }
+
                     showSuccess('Login successful! Redirecting...');
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 1000);
                 } else {
-                    showError(data.message || 'Login failed');
+                    showError(data.message || 'Invalid email or password');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showError('Server not available. Try guest login.');
+                showError('Unable to connect to server. Try guest login or check if server is running.');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Sign In';
+                btnText.textContent = 'Sign In';
+                btnLoader.style.display = 'none';
             }
         }
 
@@ -107,15 +152,27 @@
             const user = {
                 id: 'guest',
                 name: 'Guest User',
-                email: 'guest@example.com'
+                email: 'guest@smartdashboard.com'
             };
 
-            const token = 'guest_' + Date.now();
-
-            localStorage.setItem('token', token);
+            localStorage.setItem('token', 'guest_token');
             localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('isGuest', 'true');
 
             window.location.href = 'index.html';
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
         }
 
         function showError(message) {
@@ -124,6 +181,10 @@
             successEl.style.display = 'none';
             errorEl.textContent = message;
             errorEl.style.display = 'block';
+
+            // Shake animation
+            errorEl.classList.add('shake');
+            setTimeout(() => errorEl.classList.remove('shake'), 500);
 
             setTimeout(() => {
                 errorEl.style.display = 'none';
@@ -137,6 +198,15 @@
             successEl.textContent = message;
             successEl.style.display = 'block';
         }
+
+        // Load remembered email
+        document.addEventListener('DOMContentLoaded', () => {
+            const rememberedEmail = localStorage.getItem('rememberedEmail');
+            if (rememberedEmail) {
+                document.getElementById('email').value = rememberedEmail;
+                document.getElementById('rememberMe').checked = true;
+            }
+        });
     </script>
 </body>
 </html>
