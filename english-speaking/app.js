@@ -667,6 +667,19 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// ============ Stop Audio on Tab Switch ============
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        // Stop text-to-speech when user switches to another tab
+        synthesis.cancel();
+
+        // Also stop speech recognition if active
+        if (isListening && recognition) {
+            recognition.stop();
+        }
+    }
+});
+
 // Load voices when available
 if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.onvoiceschanged = () => {
