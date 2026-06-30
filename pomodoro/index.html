@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>🍅 Pomodoro Timer</h1>
+            <p class="subtitle">Stay focused, take breaks</p>
+        </header>
+
+        <!-- Timer Modes -->
+        <div class="timer-modes">
+            <button class="mode-btn active" data-mode="work" onclick="setMode('work')">Work</button>
+            <button class="mode-btn" data-mode="shortBreak" onclick="setMode('shortBreak')">Short Break</button>
+            <button class="mode-btn" data-mode="longBreak" onclick="setMode('longBreak')">Long Break</button>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="timer-container">
+            <div class="timer-circle">
+                <svg class="progress-ring" width="300" height="300">
+                    <circle class="progress-ring-bg" cx="150" cy="150" r="140"/>
+                    <circle class="progress-ring-fill" id="progressRing" cx="150" cy="150" r="140"/>
+                </svg>
+                <div class="timer-display">
+                    <span class="time" id="timerDisplay">25:00</span>
+                    <span class="mode-label" id="modeLabel">Focus Time</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer Controls -->
+        <div class="timer-controls">
+            <button class="btn-control" id="startBtn" onclick="toggleTimer()">
+                <span id="startIcon">▶</span>
+                <span id="startText">Start</span>
+            </button>
+            <button class="btn-control btn-reset" onclick="resetTimer()">
+                <span>↺</span>
+                <span>Reset</span>
+            </button>
+        </div>
+
+        <!-- Session Counter -->
+        <div class="session-info">
+            <div class="session-counter">
+                <span class="label">Sessions Completed</span>
+                <span class="count" id="sessionCount">0</span>
+            </div>
+            <div class="session-counter">
+                <span class="label">Total Focus Time</span>
+                <span class="count" id="totalTime">0m</span>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-section">
+            <h3>⚙️ Settings</h3>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <label>Work Duration</label>
+                    <div class="setting-control">
+                        <button onclick="adjustTime('work', -5)">-</button>
+                        <span id="workDuration">25</span> min
+                        <button onclick="adjustTime('work', 5)">+</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label>Short Break</label>
+                    <div class="setting-control">
+                        <button onclick="adjustTime('shortBreak', -1)">-</button>
+                        <span id="shortBreakDuration">5</span> min
+                        <button onclick="adjustTime('shortBreak', 1)">+</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label>Long Break</label>
+                    <div class="setting-control">
+                        <button onclick="adjustTime('longBreak', -5)">-</button>
+                        <span id="longBreakDuration">15</span> min
+                        <button onclick="adjustTime('longBreak', 5)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

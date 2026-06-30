@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>💰 Expense Tracker</h1>
+            <p class="subtitle">Track your monthly expenses</p>
+        </header>
+
+        <!-- Month Navigation -->
+        <div class="month-navigation">
+            <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
+            <div class="current-month">
+                <span class="month-name" id="monthName">June 2026</span>
+                <button class="btn-today" onclick="goToCurrentMonth()">Today</button>
+            </div>
+            <button class="nav-btn" onclick="changeMonth(1)">▶</button>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="card budget">
+                <div class="card-header">
+                    <h3>Monthly Budget</h3>
+                    <button class="btn-edit" onclick="openBudgetModal()">✏️</button>
+                </div>
+                <p class="amount" id="monthlyBudget">₹0</p>
+            </div>
+            <div class="card expense">
+                <h3>Total Spent</h3>
+                <p class="amount" id="totalSpent">₹0</p>
+            </div>
+            <div class="card balance">
+                <h3>Remaining</h3>
+                <p class="amount" id="remaining">₹0</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="category-breakdown">
+            <h2>Category Breakdown</h2>
+            <div class="category-list" id="categoryList">
+                <!-- Categories will be added here -->
+            </div>
+        </div>
+
+        <!-- Add Expense Form -->
+        <div class="add-expense-section">
+            <h2>Add New Expense</h2>
+            <form id="expenseForm" onsubmit="addExpense(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="amount">Amount (₹)</label>
+                        <input type="number" id="amount" placeholder="0" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" required>
+                            <option value="">Select category</option>
+                            <option value="food">🍔 Food & Dining</option>
+                            <option value="transport">🚗 Transport</option>
+                            <option value="shopping">🛒 Shopping</option>
+                            <option value="bills">📱 Bills & Utilities</option>
+                            <option value="entertainment">🎬 Entertainment</option>
+                            <option value="health">💊 Health</option>
+                            <option value="education">📚 Education</option>
+                            <option value="other">📦 Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" placeholder="What did you spend on?">
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input type="date" id="date">
+                    </div>
+                </div>
+                <button type="submit" class="btn-add">+ Add Expense</button>
+            </form>
+        </div>
+
+        <!-- Expense List -->
+        <div class="expense-list-section">
+            <div class="list-header">
+                <h2>Expenses This Month</h2>
+                <select id="filterCategory" onchange="filterExpenses()">
+                    <option value="all">All Categories</option>
+                    <option value="food">🍔 Food & Dining</option>
+                    <option value="transport">🚗 Transport</option>
+                    <option value="shopping">🛒 Shopping</option>
+                    <option value="bills">📱 Bills & Utilities</option>
+                    <option value="entertainment">🎬 Entertainment</option>
+                    <option value="health">💊 Health</option>
+                    <option value="education">📚 Education</option>
+                    <option value="other">📦 Other</option>
+                </select>
+            </div>
+            <div class="expense-list" id="expenseList">
+                <div class="empty-state" id="emptyState">
+                    <p>No expenses for this month. Start tracking!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly History -->
+        <div class="history-section">
+            <h2>📊 Monthly History</h2>
+            <div class="history-list" id="historyList">
+                <!-- History will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Modal -->
+    <div class="modal" id="budgetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Set Monthly Budget</h3>
+                <button class="close-btn" onclick="closeBudgetModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="budgetAmount">Budget for <span id="budgetMonthLabel">June 2026</span></label>
+                    <input type="number" id="budgetAmount" placeholder="Enter budget amount" min="0">
+                </div>
+                <div class="budget-suggestions">
+                    <span onclick="setBudgetValue(10000)">₹10,000</span>
+                    <span onclick="setBudgetValue(25000)">₹25,000</span>
+                    <span onclick="setBudgetValue(50000)">₹50,000</span>
+                    <span onclick="setBudgetValue(100000)">₹1,00,000</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeBudgetModal()">Cancel</button>
+                <button class="btn-save" onclick="saveBudget()">Save Budget</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

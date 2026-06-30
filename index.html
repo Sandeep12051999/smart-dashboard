@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Dashboard</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>Smart Dashboard</h1>
+            </div>
+
+            <!-- Search Box -->
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search apps..." onkeyup="filterApps()">
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="nav-tabs">
+                <div class="nav-section">
+                    <h3>Applications</h3>
+                    <ul id="appList">
+                        <li class="nav-item active" data-app="english-speaking">
+                            <span class="nav-icon">🎤</span>
+                            <span class="nav-text">AI English Speaking</span>
+                        </li>
+                        <li class="nav-item" data-app="expense-tracker">
+                            <span class="nav-icon">💰</span>
+                            <span class="nav-text">Expense Tracker</span>
+                        </li>
+                        <li class="nav-item" data-app="todo">
+                            <span class="nav-icon">✅</span>
+                            <span class="nav-text">Todo List</span>
+                            <span class="coming-soon">Coming Soon</span>
+                        </li>
+                        <li class="nav-item" data-app="notes">
+                            <span class="nav-icon">📝</span>
+                            <span class="nav-text">Quick Notes</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Tools</h3>
+                    <ul>
+                        <li class="nav-item" data-app="calculator">
+                            <span class="nav-icon">🧮</span>
+                            <span class="nav-text">Calculator</span>
+                        </li>
+                        <li class="nav-item" data-app="pomodoro">
+                            <span class="nav-icon">🍅</span>
+                            <span class="nav-text">Pomodoro Timer</span>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- User Info -->
+            <div class="user-section">
+                <div class="user-avatar" id="userAvatar">SP</div>
+                <div class="user-info">
+                    <span class="user-name" id="userName">User</span>
+                    <span class="user-status">Online</span>
+                </div>
+                <button class="btn-logout" onclick="logout()" title="Logout">🚪</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="breadcrumb">
+                    <span>Dashboard</span>
+                    <span class="separator">/</span>
+                    <span id="currentAppName">AI English Speaking</span>
+                </div>
+                <div class="top-actions">
+                    <button class="btn-icon" onclick="toggleFullscreen()" title="Fullscreen">
+                        [ ]
+                    </button>
+                    <button class="btn-icon" onclick="openInNewTab()" title="Open in new tab">
+                        Open
+                    </button>
+                    <button class="btn-icon" onclick="refreshApp()" title="Refresh">
+                        Refresh
+                    </button>
+                </div>
+            </header>
+
+            <!-- App Container (iframe) -->
+            <div class="app-container">
+                <iframe id="appFrame" src="english-speaking/index.html" frameborder="0"></iframe>
+            </div>
+
+            <!-- Welcome Screen (shown when no app selected) -->
+            <div class="welcome-screen" id="welcomeScreen" style="display: none;">
+                <h2>Welcome to Smart Dashboard</h2>
+                <p>Select an app from the sidebar to get started</p>
+
+                <div class="quick-apps">
+                    <div class="quick-app" onclick="loadApp('english-speaking')">
+                        <span class="quick-icon">🎤</span>
+                        <span class="quick-name">AI English Speaking</span>
+                        <span class="quick-desc">Practice speaking with AI tutor</span>
+                    </div>
+                    <div class="quick-app disabled">
+                        <span class="quick-icon">💰</span>
+                        <span class="quick-name">Expense Tracker</span>
+                        <span class="quick-desc">Coming Soon</span>
+                    </div>
+                    <div class="quick-app disabled">
+                        <span class="quick-icon">✅</span>
+                        <span class="quick-name">Todo List</span>
+                        <span class="quick-desc">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        // Check authentication on page load
+        (function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            if (!token || !user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Display user info
+            try {
+                const userData = JSON.parse(user);
+                document.getElementById('userName').textContent = userData.name || 'User';
+                document.getElementById('userAvatar').textContent = getInitials(userData.name || 'User');
+            } catch (e) {
+                console.error('Error parsing user data');
+            }
+        })();
+
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

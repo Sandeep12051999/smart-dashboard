@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Speaking Practice - AI Tutor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎤 English Speaking Practice</h1>
+            <p class="subtitle">Practice with AI Tutor • Hindi Explanations</p>
+        </header>
+
+        <!-- Module Selection -->
+        <div class="module-selector">
+            <h3>Select Practice Module:</h3>
+            <div class="modules">
+                <button class="module-btn active" data-module="interview">
+                    💼 Technical Interview
+                </button>
+                <button class="module-btn" data-module="hr">
+                    🤝 HR Interview
+                </button>
+                <button class="module-btn" data-module="client">
+                    📞 Client Call
+                </button>
+                <button class="module-btn" data-module="standup">
+                    📋 Daily Standup
+                </button>
+                <button class="module-btn" data-module="general">
+                    💬 General Conversation
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will appear here -->
+            </div>
+        </div>
+
+        <!-- Analysis Panel -->
+        <div class="analysis-panel" id="analysisPanel">
+            <div class="analysis-header">
+                <h4>📝 Grammar Analysis</h4>
+                <button class="close-btn" onclick="closeAnalysis()">×</button>
+            </div>
+            <div class="analysis-content" id="analysisContent">
+                <!-- Analysis will appear here -->
+            </div>
+        </div>
+
+        <!-- Voice Controls -->
+        <div class="voice-controls">
+            <div class="status-indicator" id="statusIndicator">
+                <span class="status-dot"></span>
+                <span class="status-text">Ready to listen</span>
+            </div>
+
+            <div class="control-buttons">
+                <button class="voice-btn" id="voiceBtn" onclick="toggleListening()">
+                    <span class="mic-icon">🎤</span>
+                    <span class="btn-text">Hold to Speak</span>
+                </button>
+
+                <button class="action-btn" id="speakBtn" onclick="speakLastResponse()">
+                    🔊 Replay
+                </button>
+
+                <button class="action-btn" id="newTopicBtn" onclick="startNewTopic()">
+                    🔄 New Topic
+                </button>
+            </div>
+
+            <!-- Text Input Alternative -->
+            <div class="text-input-container">
+                <input type="text" id="textInput" placeholder="Or type your message here..."
+                       onkeypress="handleKeyPress(event)">
+                <button class="send-btn" onclick="sendTextMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settingsPanel">
+            <h3>⚙️ Settings</h3>
+            <div class="setting-item">
+                <label>AI Backend:</label>
+                <select id="aiBackend">
+                    <option value="ollama">Ollama (Local - Free)</option>
+                    <option value="browser">Browser AI (Limited)</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label>Ollama Model:</label>
+                <select id="ollamaModel">
+                    <option value="llama3.2">Llama 3.2 (Recommended)</option>
+                    <option value="mistral">Mistral</option>
+                    <option value="phi3">Phi-3</option>
+                    <option value="gemma2">Gemma 2</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label>Voice Speed:</label>
+                <input type="range" id="voiceSpeed" min="0.5" max="2" step="0.1" value="1">
+                <span id="speedValue">1x</span>
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="autoSpeak" checked>
+                    Auto-speak AI responses
+                </label>
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="showHindi" checked>
+                    Show Hindi explanations
+                </label>
+            </div>
+            <button class="save-settings-btn" onclick="saveSettings()">Save Settings</button>
+        </div>
+
+        <!-- Settings Toggle -->
+        <button class="settings-toggle" onclick="toggleSettings()">⚙️</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

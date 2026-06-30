@@ -1,0 +1,258 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0d1117;
+    min-height: 100vh;
+    color: #fff;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+}
+
+.header h1 {
+    font-size: 1.4rem;
+    background: linear-gradient(90deg, #58a6ff, #a371f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.btn-new {
+    padding: 10px 20px;
+    background: linear-gradient(90deg, #58a6ff, #a371f7);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-new:hover {
+    transform: translateY(-2px);
+}
+
+.notes-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Notes Sidebar */
+.notes-sidebar {
+    width: 300px;
+    background: #161b22;
+    border-right: 1px solid #30363d;
+    display: flex;
+    flex-direction: column;
+}
+
+.search-box {
+    padding: 15px;
+    border-bottom: 1px solid #30363d;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 15px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    color: #fff;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: #58a6ff;
+}
+
+.notes-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.note-item {
+    padding: 15px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.note-item:hover {
+    background: rgba(88, 166, 255, 0.1);
+}
+
+.note-item.active {
+    background: rgba(88, 166, 255, 0.15);
+    border-left-color: #58a6ff;
+}
+
+.note-item h4 {
+    font-size: 0.95rem;
+    color: #c9d1d9;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.note-item p {
+    font-size: 0.8rem;
+    color: #6e7681;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.note-item .note-date {
+    font-size: 0.7rem;
+    color: #484f58;
+    margin-top: 8px;
+}
+
+.empty-notes {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6e7681;
+}
+
+/* Note Editor */
+.note-editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #0d1117;
+}
+
+.editor-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    border-bottom: 1px solid #30363d;
+    background: #161b22;
+}
+
+.editor-toolbar input {
+    flex: 1;
+    padding: 10px 0;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 600;
+    outline: none;
+}
+
+.editor-toolbar input::placeholder {
+    color: #484f58;
+}
+
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.save-status {
+    font-size: 0.8rem;
+    color: #3fb950;
+}
+
+.save-status.saving {
+    color: #f7931a;
+}
+
+.btn-delete {
+    background: transparent;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.btn-delete:hover {
+    background: rgba(248, 81, 73, 0.1);
+    border-color: #f85149;
+}
+
+#noteContent {
+    flex: 1;
+    padding: 25px;
+    background: transparent;
+    border: none;
+    color: #c9d1d9;
+    font-size: 1rem;
+    line-height: 1.8;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+}
+
+#noteContent::placeholder {
+    color: #484f58;
+}
+
+.editor-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 25px;
+    border-top: 1px solid #30363d;
+    font-size: 0.8rem;
+    color: #6e7681;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .notes-sidebar {
+        width: 100%;
+        position: absolute;
+        left: 0;
+        top: 60px;
+        bottom: 0;
+        z-index: 10;
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+    }
+
+    .notes-sidebar.show {
+        transform: translateX(0);
+    }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+}

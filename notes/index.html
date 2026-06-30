@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Notes</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>📝 Quick Notes</h1>
+            <button class="btn-new" onclick="createNewNote()">+ New Note</button>
+        </header>
+
+        <div class="notes-container">
+            <!-- Notes Sidebar -->
+            <aside class="notes-sidebar">
+                <div class="search-box">
+                    <input type="text" id="searchNotes" placeholder="Search notes..." oninput="searchNotes()">
+                </div>
+                <div class="notes-list" id="notesList">
+                    <!-- Notes will be listed here -->
+                </div>
+            </aside>
+
+            <!-- Note Editor -->
+            <main class="note-editor">
+                <div class="editor-toolbar">
+                    <input type="text" id="noteTitle" placeholder="Note title..." oninput="autoSave()">
+                    <div class="toolbar-actions">
+                        <span class="save-status" id="saveStatus">Saved</span>
+                        <button class="btn-delete" onclick="deleteCurrentNote()" title="Delete note">🗑️</button>
+                    </div>
+                </div>
+                <textarea id="noteContent" placeholder="Start writing..." oninput="autoSave()"></textarea>
+                <div class="editor-footer">
+                    <span id="charCount">0 characters</span>
+                    <span id="lastSaved"></span>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
