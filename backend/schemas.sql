@@ -101,7 +101,8 @@ CREATE TABLE pomodoro_stats (
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     pomodoros_completed INTEGER DEFAULT 0,
     focus_time INTEGER DEFAULT 0,
-    tasks_completed INTEGER DEFAULT 0
+    tasks_completed INTEGER DEFAULT 0,
+    UNIQUE(user_id, date)
 );
 
 -- ============================================
