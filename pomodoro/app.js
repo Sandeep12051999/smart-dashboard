@@ -646,7 +646,7 @@ function playNotification() {
         oscillator.start();
         setTimeout(() => oscillator.stop(), 200);
     } catch (e) {
-        console.log('Audio not supported');
+        // Audio not supported - silent fail
     }
 }
 

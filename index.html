@@ -108,15 +108,15 @@
                         <span class="quick-name">AI English Speaking</span>
                         <span class="quick-desc">Practice speaking with AI tutor</span>
                     </div>
-                    <div class="quick-app disabled">
+                    <div class="quick-app" onclick="loadApp('expense-tracker')">
                         <span class="quick-icon">💰</span>
                         <span class="quick-name">Expense Tracker</span>
-                        <span class="quick-desc">Coming Soon</span>
+                        <span class="quick-desc">Track your expenses</span>
                     </div>
-                    <div class="quick-app disabled">
-                        <span class="quick-icon">✅</span>
-                        <span class="quick-name">Todo List</span>
-                        <span class="quick-desc">Coming Soon</span>
+                    <div class="quick-app" onclick="loadApp('notes')">
+                        <span class="quick-icon">📝</span>
+                        <span class="quick-name">Quick Notes</span>
+                        <span class="quick-desc">Take and organize notes</span>
                     </div>
                 </div>
             </div>
@@ -141,7 +141,8 @@
                 document.getElementById('userName').textContent = userData.name || 'User';
                 document.getElementById('userAvatar').textContent = getInitials(userData.name || 'User');
             } catch (e) {
-                console.error('Error parsing user data');
+                // Invalid user data - redirect to login
+                window.location.href = 'login.html';
             }
         })();
 

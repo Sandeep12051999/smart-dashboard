@@ -6,7 +6,7 @@ const pool = new Pool({
     user: process.env.DB_USER || 'postgres',
     host: process.env.DB_HOST || 'localhost',
     database: process.env.DB_NAME || 'smart_dashboard',
-    password: process.env.DB_PASSWORD || 'postgre',
+    password: process.env.DB_PASSWORD || 'password',
     port: process.env.DB_PORT || 5433,
 });
 
