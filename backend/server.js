@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 // Import database config
-const { pool, initializeTables } = require('./config/db');
+const { pool } = require('./config/db');
 
 // Import routes
 const authRoutes = require('./routes/auth')(pool);
@@ -22,9 +22,6 @@ app.use(express.json());
 
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production';
-
-// Initialize database tables
-initializeTables();
 
 // Auth Middleware
 const authMiddleware = (req, res, next) => {
